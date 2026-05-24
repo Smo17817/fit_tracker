@@ -2,23 +2,34 @@ class WorkoutSet {
   int reps;
   double weight;
 
-  WorkoutSet({
-    this.reps = 0,
-    this.weight = 0.0,
-  });
+  WorkoutSet({this.reps = 0, this.weight = 0.0});
+
+  // NUOVO: Metodo per creare una copia esatta ma indipendente
+  WorkoutSet clone() {
+    return WorkoutSet(reps: reps, weight: weight);
+  }
 }
 
 class Exercise {
   String name;
-  // Ora abbiamo una lista di serie al posto delle singole variabili
   List<WorkoutSet> sets;
 
   Exercise({
     this.name = '',
     List<WorkoutSet>? sets,
-  }) : sets = sets ?? [WorkoutSet()]; // Inizializza l'esercizio con almeno 1 serie vuota di default
+  }) : sets = sets ?? [WorkoutSet()];
+
+  // NUOVO: Metodo per clonare l'esercizio e tutte le sue serie
+  Exercise clone() {
+    return Exercise(
+      name: name,
+      // Usiamo .map() per chiamare il clone() su ogni singola serie
+      sets: sets.map((s) => s.clone()).toList(),
+    );
+  }
 }
 
+// ... il resto del file (WorkoutSession e globalWorkoutHistory) rimane uguale
 class WorkoutSession {
   DateTime date;
   String muscleGroup;

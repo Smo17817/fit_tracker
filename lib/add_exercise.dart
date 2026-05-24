@@ -43,9 +43,8 @@ class _AddExercisePageState extends State<AddExercisePage> {
               labelText: 'Gruppo Muscolare',
               border: OutlineInputBorder(),
             ),
-            value: selectedMuscleGroup, // Il valore attualmente selezionato
+            value: selectedMuscleGroup,
             hint: const Text('Seleziona un gruppo...'),
-            // Generiamo le opzioni del menu a tendina mappando la nostra lista
             items: muscleGroups.map((String group) {
               return DropdownMenuItem<String>(
                 value: group,
@@ -53,9 +52,35 @@ class _AddExercisePageState extends State<AddExercisePage> {
               );
             }).toList(),
             onChanged: (String? newValue) {
-              // Quando l'utente seleziona una voce, aggiorniamo lo stato
               setState(() {
                 selectedMuscleGroup = newValue;
+
+                if (newValue != null) {
+                  // 1. Filtriamo lo storico per trovare solo gli allenamenti di questo gruppo
+                  final pastWorkouts = globalWorkoutHistory.where(
+                    (workout) => workout.muscleGroup == newValue
+                  );
+
+                  // 2. Controlliamo se esiste almeno un allenamento passato
+                  if (pastWorkouts.isNotEmpty) {
+                    // Prendiamo il più recente (che è l'ultimo aggiunto alla lista)
+                    final lastWorkout = pastWorkouts.last;
+                    
+                    // 3. CLONIAMO gli esercizi usando il nuovo metodo!
+                    exercises = lastWorkout.exercises.map((e) => e.clone()).toList();
+
+                    // Mostriamo un piccolo avviso all'utente
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Caricato ultimo allenamento: ${newValue}!'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  } else {
+                    // Se non ci sono allenamenti passati per questo gruppo, puliamo la lista
+                    exercises = [Exercise()];
+                  }
+                }
               });
             },
           ),
@@ -128,17 +153,20 @@ class _AddExercisePageState extends State<AddExercisePage> {
   // Ritorna un Widget che rappresenta il form del singolo esercizio.
   Widget _buildExerciseCard(Exercise exercise, int exerciseIndex) {
     return Card(
+      // 1. LA CHIAVE: Forza Flutter a ridisegnare la scheda quando carichiamo lo storico
+      key: ObjectKey(exercise), 
       margin: const EdgeInsets.only(bottom: 16.0),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Riga Intestazione: Nome Esercizio + Cestino di eliminazione scheda
             Row(
               children: [
                 Expanded(
-                  child: TextField(
+                  // 2. Usiamo TextFormField e passiamo initialValue
+                  child: TextFormField(
+                    initialValue: exercise.name, 
                     decoration: InputDecoration(
                       labelText: 'Nome Esercizio ${exerciseIndex + 1}',
                       border: const OutlineInputBorder(),
@@ -147,13 +175,11 @@ class _AddExercisePageState extends State<AddExercisePage> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Pulsante per eliminare l'INTERO esercizio
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.redAccent),
                   tooltip: 'Elimina esercizio',
                   onPressed: () {
                     setState(() {
-                      // Rimuove l'esercizio dalla lista principale usando l'indice
                       exercises.removeAt(exerciseIndex);
                     });
                   },
@@ -167,7 +193,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
             ),
             const SizedBox(height: 8),
 
-            // Mappiamo la lista delle serie (sets)
             ...exercise.sets.asMap().entries.map((entry) {
               int setIndex = entry.key;
               WorkoutSet currentSet = entry.value;
@@ -182,7 +207,9 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: TextField(
+                      // 3. Precompiliamo le Ripetizioni (evitando di scrivere "0" se è una nuova serie vuota)
+                      child: TextFormField(
+                        initialValue: currentSet.reps > 0 ? currentSet.reps.toString() : '',
                         decoration: const InputDecoration(labelText: 'Reps'),
                         keyboardType: TextInputType.number,
                         onChanged: (value) => currentSet.reps = int.tryParse(value) ?? 0,
@@ -190,13 +217,14 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      child: TextField(
+                      // 4. Precompiliamo il Carico 
+                      child: TextFormField(
+                        initialValue: currentSet.weight > 0 ? currentSet.weight.toString() : '',
                         decoration: const InputDecoration(labelText: 'Kg'),
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (value) => currentSet.weight = double.tryParse(value) ?? 0.0,
                       ),
                     ),
-                    // Pulsante per eliminare la singola serie
                     IconButton(
                       icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
                       onPressed: () {
@@ -212,7 +240,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
 
             const SizedBox(height: 10),
             
-            // Pulsante per aggiungere una nuova serie
             Center(
               child: TextButton.icon(
                 onPressed: () {
