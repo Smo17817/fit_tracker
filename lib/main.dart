@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'add_exercise.dart';
+import 'hystory_page.dart';
 
 void main() {
   runApp(const FitTrackApp());
@@ -36,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
   // Questa è la lista delle pagine che il menu andrà a scambiare
   final List<Widget> pages = [
     const AddExercisePage(), // 0: La pagina che abbiamo già creato
-    const Center(child: Text('Storico Allenamenti in arrivo...')), // 1: Segnaposto
+    const HistoryPage(), // 1: La pagina dello storico che abbiamo già creato
     const Center(child: Text('Profilo Utente')), // 2: Segnaposto
   ];
 
