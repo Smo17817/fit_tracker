@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'add_exercise.dart';
 import 'hystory_page.dart';
+import 'models/exercise.dart';
 
-void main() {
+void main() async {
+  // Obbligatorio quando si esegue codice asincrono prima di runApp()
+  WidgetsFlutterBinding.ensureInitialized(); 
+  
+  // Carica i dati dal disco alla memoria RAM
+  await loadWorkoutHistory(); 
+  
   runApp(const FitTrackApp());
 }
 
@@ -13,6 +20,7 @@ class FitTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Fit Tracker',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -38,7 +46,6 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> pages = [
     const AddExercisePage(), // 0: La pagina che abbiamo già creato
     const HistoryPage(), // 1: La pagina dello storico che abbiamo già creato
-    const Center(child: Text('Profilo Utente')), // 2: Segnaposto
   ];
 
   @override
@@ -67,11 +74,6 @@ class _MainScreenState extends State<MainScreen> {
             selectedIcon: Icon(Icons.history),
             icon: Icon(Icons.history_outlined),
             label: 'Storico',
-          ),
-          NavigationDestination(
-            selectedIcon: Icon(Icons.person),
-            icon: Icon(Icons.person_outline),
-            label: 'Profilo',
           ),
         ],
       ),

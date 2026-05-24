@@ -105,7 +105,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
             ),
-            onPressed: () {
+            onPressed: () async {
               // 4. Aggiorniamo il controllo di validazione
               if (exercises.isEmpty || selectedMuscleGroup == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -121,6 +121,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
               );
 
               globalWorkoutHistory.add(session);
+              await saveWorkoutHistory();
 
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Allenamento salvato con successo!')),
