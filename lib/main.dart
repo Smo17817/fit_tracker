@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'add_exercise.dart';
 import 'hystory_page.dart';
+import 'settings_page.dart';
 import 'models/exercise.dart';
 
 void main() async {
@@ -46,6 +47,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> pages = [
     const AddExercisePage(), // 0: La pagina che abbiamo già creato
     const HistoryPage(), // 1: La pagina dello storico che abbiamo già creato
+    const SettingsPage(), // 2: La pagina delle impostazioni che abbiamo già creato
   ];
 
   @override
@@ -74,6 +76,11 @@ class _MainScreenState extends State<MainScreen> {
             selectedIcon: Icon(Icons.history),
             icon: Icon(Icons.history_outlined),
             label: 'Storico',
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.settings),
+            icon: Icon(Icons.settings_outlined),
+            label: 'Impostazioni',
           ),
         ],
       ),
