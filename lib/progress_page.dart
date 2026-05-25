@@ -153,7 +153,7 @@ class _ProgressPageState extends State<ProgressPage> {
 
   // Aggiunto il parametro BuildContext per accedere al tema
   Widget _buildGraficoNativo(List<_ProgressPoint> punti, BuildContext context) {
-    final ultimiPunti = punti.length > 6 ? punti.sublist(punti.length - 6) : punti;
+    final ultimiPunti = punti; // Adesso prende tutta la storia dell'esercizio
     
     // Recuperiamo il colore primario
     final primaryColor = Theme.of(context).colorScheme.primary;
@@ -161,44 +161,55 @@ class _ProgressPageState extends State<ProgressPage> {
     double valoreMassimoAssoluto = ultimiPunti.map((p) => p.value).reduce((a, b) => a > b ? a : b);
     if (valoreMassimoAssoluto == 0) valoreMassimoAssoluto = 1;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: ultimiPunti.map((p) {
-        final double altezzaBarra = (p.value / valoreMassimoAssoluto) * 90;
-        final dataFormattata = '${p.date.day}/${p.date.month}';
+    // Avvolgiamo la riga in una SingleChildScrollView orizzontale
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      // Usiamo reverse: true se vuoi che parta già scorrendo verso gli allenamenti più recenti a destra
+      reverse: true, 
+      child: Row(
+        // Cambiamo l'allineamento per evitare che si allarghino troppo
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: ultimiPunti.map((p) {
+          final double altezzaBarra = (p.value / valoreMassimoAssoluto) * 90;
+          final dataFormattata = '${p.date.day}/${p.date.month}';
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              p.value.toStringAsFixed(0),
-              style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+          return Padding(
+            // Aggiungiamo 12 pixel di spazio fisso a destra di ogni barra
+            padding: const EdgeInsets.only(right: 12.0), 
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  p.value.toStringAsFixed(0),
+                  style: const TextStyle(fontSize: 11, color: Colors.grey, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 6),
+                Container(
+                  width: 28,
+                  height: altezzaBarra < 6 ? 6 : altezzaBarra, 
+                  decoration: BoxDecoration(
+                    color: primaryColor,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: primaryColor.withOpacity(0.2),
+                        blurRadius: 4,
+                        offset: const Offset(0, -2),
+                      )
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  dataFormattata,
+                  style: const TextStyle(fontSize: 10, color: Colors.grey),
+                ),
+              ],
             ),
-            const SizedBox(height: 6),
-            Container(
-              width: 28,
-              height: altezzaBarra < 6 ? 6 : altezzaBarra, 
-              decoration: BoxDecoration(
-                color: primaryColor, // La barra ora usa il colore del tema
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryColor.withOpacity(0.2), // L'ombra "Glow" si adatta al tema
-                    blurRadius: 4,
-                    offset: const Offset(0, -2),
-                  )
-                ],
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              dataFormattata,
-              style: const TextStyle(fontSize: 10, color: Colors.grey),
-            ),
-          ],
-        );
-      }).toList(),
+          );
+        }).toList(),
+      ),
     );
   }
 }
