@@ -38,7 +38,7 @@ I pacchetti principali utilizzati includono:
 Assicurati di aver installato:
 * [Flutter SDK](https://flutter.dev/docs/get-started/install) (versione >=3.4.0)
 * Android Studio o VS Code
-* Java JDK 21 (o compatibile con il tuo Gradle wrapper)
+* Java JDK 17 (o compatibile con il tuo Gradle wrapper)
 
 ### Clonare il progetto
 
