@@ -37,7 +37,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
-          // 3. Sostituiamo il TextField con il DropdownButtonFormField
+          // Menu a tendina per il muscolo
           DropdownButtonFormField<String>(
             decoration: const InputDecoration(
               labelText: 'Gruppo Muscolare',
@@ -56,28 +56,21 @@ class _AddExercisePageState extends State<AddExercisePage> {
                 selectedMuscleGroup = newValue;
 
                 if (newValue != null) {
-                  // 1. Filtriamo lo storico per trovare solo gli allenamenti di questo gruppo
                   final pastWorkouts = globalWorkoutHistory.where(
                     (workout) => workout.muscleGroup == newValue
                   );
 
-                  // 2. Controlliamo se esiste almeno un allenamento passato
                   if (pastWorkouts.isNotEmpty) {
-                    // Prendiamo il più recente (che è l'ultimo aggiunto alla lista)
                     final lastWorkout = pastWorkouts.last;
-                    
-                    // 3. CLONIAMO gli esercizi usando il nuovo metodo!
                     exercises = lastWorkout.exercises.map((e) => e.clone()).toList();
 
-                    // Mostriamo un piccolo avviso all'utente
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Caricato ultimo allenamento: ${newValue}!'),
+                        content: Text('Caricato ultimo allenamento: $newValue!'),
                         duration: const Duration(seconds: 2),
                       ),
                     );
                   } else {
-                    // Se non ci sono allenamenti passati per questo gruppo, puliamo la lista
                     exercises = [Exercise()];
                   }
                 }
@@ -92,6 +85,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
           ),
           const SizedBox(height: 10),
           
+          // Lista delle schede degli esercizi
           ...exercises.asMap().entries.map((entry) {
             int index = entry.key;
             Exercise exercise = entry.value;
@@ -100,52 +94,63 @@ class _AddExercisePageState extends State<AddExercisePage> {
 
           const SizedBox(height: 20),
 
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
+          // --- NUOVO PULSANTE: AGGIUNGI ESERCIZIO ---
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+              side: const BorderSide(color: Color(0xFF00E676), width: 2), // Bordo verde neon
+              foregroundColor: const Color(0xFF00E676), // Testo verde neon
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
             ),
-            onPressed: () async {
-              // 4. Aggiorniamo il controllo di validazione
-              if (exercises.isEmpty || selectedMuscleGroup == null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Seleziona un gruppo muscolare e inserisci almeno un esercizio!')),
-                );
-                return;
-              }
-
-              final session = WorkoutSession(
-                date: DateTime.now(),
-                muscleGroup: selectedMuscleGroup!, // Usiamo il '!' perché siamo sicuri che non è nullo grazie al controllo sopra
-                exercises: List.from(exercises), 
-              );
-
-              globalWorkoutHistory.add(session);
-              await saveWorkoutHistory();
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Allenamento salvato con successo!')),
-              );
-
-              // 5. Ripuliamo la pagina riportando a null il menu a tendina
+            onPressed: () {
               setState(() {
-                selectedMuscleGroup = null;
-                exercises = [Exercise()];
+                exercises.add(Exercise());
               });
             },
-            icon: const Icon(Icons.save),
-            label: const Text('Salva Allenamento', style: TextStyle(fontSize: 18)),
+            icon: const Icon(Icons.add_circle_outline),
+            label: const Text('Aggiungi Nuovo Esercizio', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
-          const SizedBox(height: 80),
+          
+          const SizedBox(height: 80), // Spazio extra per evitare che il FAB copra l'ultimo bottone
         ],
       ),
+      
+      // --- NUOVO PULSANTE: SALVA ALLENAMENTO (FAB) ---
+      // Usiamo .extended per avere sia l'icona che il testo
+      // --- PULSANTE: SALVA ALLENAMENTO (Solo Icona) ---
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
+        onPressed: () async {
+          if (exercises.isEmpty || selectedMuscleGroup == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Seleziona un gruppo muscolare e inserisci almeno un esercizio!')),
+            );
+            return;
+          }
+
+          final session = WorkoutSession(
+            date: DateTime.now(),
+            muscleGroup: selectedMuscleGroup!,
+            exercises: List.from(exercises), 
+          );
+
+          globalWorkoutHistory.add(session);
+          await saveWorkoutHistory();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Allenamento salvato con successo!', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+              backgroundColor: Color(0xFF00E676),
+            ),
+          );
+
           setState(() {
-            exercises.add(Exercise());
+            selectedMuscleGroup = null;
+            exercises = [Exercise()];
           });
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.save), // <--- Solo l'icona qui
       ),
     );
   }

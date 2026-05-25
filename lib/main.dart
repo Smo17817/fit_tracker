@@ -24,8 +24,81 @@ class FitTrackApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Fit Tracker',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
+        brightness: Brightness.dark,
+        // 1. Sfondo generale quasi nero
+        scaffoldBackgroundColor: const Color(0xFF09090B), 
+        
+        // 2. Schema colori principale
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00E676), // Il tuo Verde Neon
+          onPrimary: Colors.black,    // Testo nero sui bottoni verdi per massimo contrasto
+          surface: Color(0xFF18181B), // Grigio scuro per le Card (schede)
+          onSurface: Colors.white,    // Testo bianco sulle Card
+        ),
+
+        // 3. Stile delle Schede (Cards) più smussato e moderno
+        cardTheme: CardTheme(
+          color: const Color(0xFF18181B),
+          elevation: 0, // Togliamo le ombre per un look "flat" e pulito
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+
+        // 4. Stile dei campi di testo (Input)
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF27272A), // Sfondo del campo di testo
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: Color(0xFF00E676), width: 2),
+          ),
+          labelStyle: const TextStyle(color: Colors.grey),
+          floatingLabelStyle: const TextStyle(color: Color(0xFF00E676)),
+        ),
+
+        // 5. Menu di navigazione inferiore
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: const Color(0xFF09090B),
+          indicatorColor: const Color(0xFF00E676).withOpacity(0.2), // Sfondo icona attiva
+          iconTheme: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const IconThemeData(color: Color(0xFF00E676)); // Icona verde se attiva
+            }
+            return const IconThemeData(color: Colors.grey); // Grigia se inattiva
+          }),
+          labelTextStyle: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) {
+              return const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold);
+            }
+            return const TextStyle(color: Colors.grey);
+          }),
+        ),
+
+        // 6. Pulsante Fluttuante (FAB) in basso a destra
+        floatingActionButtonTheme: const FloatingActionButtonThemeData(
+          backgroundColor: Color(0xFF00E676),
+          foregroundColor: Colors.black, // Icona "+" nera
+          shape: CircleBorder(), // Rotondo perfetto
+        ),
+
+        // 7. Barra superiore
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF09090B),
+          surfaceTintColor: Colors.transparent, // Evita che l'appbar cambi colore scorrendo
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20, 
+            fontWeight: FontWeight.bold, 
+            color: Colors.white
+          ),
+        ),
       ),
       home: const MainScreen(),
     );
