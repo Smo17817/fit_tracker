@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/exercise.dart'; // Assicurati che il percorso sia corretto
+import '../models/exercise.dart'; 
 
-// 1. La pagina ora è uno StatefulWidget
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
@@ -12,6 +11,9 @@ class HistoryPage extends StatefulWidget {
 class _HistoryPageState extends State<HistoryPage> {
   @override
   Widget build(BuildContext context) {
+    // Recuperiamo il colore primario del tema attivo
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Storico Allenamenti'),
@@ -39,7 +41,6 @@ class _HistoryPageState extends State<HistoryPage> {
                   margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: ExpansionTile(
                     leading: const Icon(Icons.calendar_today),
-                    // 2. Modifichiamo il titolo per inserire il bottone del cestino
                     title: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -47,12 +48,10 @@ class _HistoryPageState extends State<HistoryPage> {
                           session.muscleGroup,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        // Bottone di eliminazione
                         IconButton(
                           icon: const Icon(Icons.delete_outline, color: Colors.red),
                           tooltip: 'Elimina allenamento',
                           onPressed: () {
-                            // Chiamiamo il metodo per mostrare il popup
                             _mostraPopupConferma(context, reversedIndex);
                           },
                         ),
@@ -68,7 +67,8 @@ class _HistoryPageState extends State<HistoryPage> {
                           children: [
                             Row(
                               children: [
-                                const Icon(Icons.fitness_center, size: 18, color: Colors.deepOrange),
+                                // --- FIX 1: L'icona ora usa il colore del tema ---
+                                Icon(Icons.fitness_center, size: 18, color: primaryColor),
                                 const SizedBox(width: 8),
                                 Text(
                                   exercise.name.isEmpty ? 'Esercizio senza nome' : exercise.name,
@@ -88,8 +88,11 @@ class _HistoryPageState extends State<HistoryPage> {
                               return Padding(
                                 padding: const EdgeInsets.only(left: 26.0, bottom: 4.0),
                                 child: Text(
-                                  'Set ${setIndex + 1}:   ${currentSet.reps} reps   @   ${currentSet.weight} kg',
-                                  style: const TextStyle(fontSize: 15, color: Colors.black87),
+                                  // --- FIX 2: Ripristinato exercise.unit invece di "kg" fisso ---
+                                  'Set ${setIndex + 1}:   ${currentSet.reps} reps   @   ${currentSet.weight} ${exercise.unit}',
+                                  // --- FIX 3: Rimosso color: Colors.black87. 
+                                  // Ora si adatta automaticamente al testo chiaro/scuro del tema ---
+                                  style: const TextStyle(fontSize: 15), 
                                 ),
                               );
                             }),
@@ -105,7 +108,6 @@ class _HistoryPageState extends State<HistoryPage> {
     );
   }
 
-  // 3. Metodo separato per gestire il popup di conferma
   void _mostraPopupConferma(BuildContext context, int indexDaEliminare) {
     showDialog(
       context: context,
@@ -116,26 +118,20 @@ class _HistoryPageState extends State<HistoryPage> {
             'Sei sicuro di voler eliminare questo allenamento dallo storico? L\'azione è irreversibile.',
           ),
           actions: [
-            // Bottone Annulla
             TextButton(
               onPressed: () {
-                // Chiude semplicemente il popup senza fare nulla
                 Navigator.of(dialogContext).pop(); 
               },
               child: const Text('Annulla'),
             ),
-            // Bottone Elimina
             TextButton(
               onPressed: () {
-                // Aggiorniamo lo stato eliminando l'elemento dalla lista globale
                 setState(() {
                   globalWorkoutHistory.removeAt(indexDaEliminare);
                 });
                 
-                // Chiudiamo il popup
                 Navigator.of(dialogContext).pop();
 
-                // Mostriamo un feedback visivo opzionale
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Allenamento eliminato.'),
