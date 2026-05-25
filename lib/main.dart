@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'add_exercise.dart';
-import 'hystory_page.dart';
+import 'hystory_page.dart'; // Mantenuto il nome del file originale
 import 'settings_page.dart';
 import 'models/exercise.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   // Obbligatorio quando si esegue codice asincrono prima di runApp()
@@ -17,7 +18,6 @@ void main() async {
 class FitTrackApp extends StatelessWidget {
   const FitTrackApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,30 +26,34 @@ class FitTrackApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        // 1. Sfondo generale quasi nero
+        
+        // Configurazione globale del font per tutto il testo dell'applicazione
+        textTheme: GoogleFonts.oswaldTextTheme(ThemeData.dark().textTheme),
+
+        // Sfondo generale quasi nero
         scaffoldBackgroundColor: const Color(0xFF09090B), 
         
-        // 2. Schema colori principale
+        // Schema colori principale (Dark Mode con accento Verde Neon)
         colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00E676), // Il tuo Verde Neon
-          onPrimary: Colors.black,    // Testo nero sui bottoni verdi per massimo contrasto
-          surface: Color(0xFF18181B), // Grigio scuro per le Card (schede)
-          onSurface: Colors.white,    // Testo bianco sulle Card
+          primary: Color(0xFF00E676), 
+          onPrimary: Colors.black,    
+          surface: Color(0xFF18181B), 
+          onSurface: Colors.white,    
         ),
 
-        // 3. Stile delle Schede (Cards) più smussato e moderno
+        // Stile delle Schede (Cards) smussato e piatto
         cardTheme: CardTheme(
           color: const Color(0xFF18181B),
-          elevation: 0, // Togliamo le ombre per un look "flat" e pulito
+          elevation: 0, 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
           ),
         ),
 
-        // 4. Stile dei campi di testo (Input)
+        // Stile moderno dei campi di testo (Input)
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: const Color(0xFF27272A), // Sfondo del campo di testo
+          fillColor: const Color(0xFF27272A), 
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
             borderSide: BorderSide.none,
@@ -62,15 +66,15 @@ class FitTrackApp extends StatelessWidget {
           floatingLabelStyle: const TextStyle(color: Color(0xFF00E676)),
         ),
 
-        // 5. Menu di navigazione inferiore
+        // Menu di navigazione inferiore in stile minimalista
         navigationBarTheme: NavigationBarThemeData(
           backgroundColor: const Color(0xFF09090B),
-          indicatorColor: const Color(0xFF00E676).withOpacity(0.2), // Sfondo icona attiva
+          indicatorColor: const Color(0xFF00E676).withOpacity(0.2), 
           iconTheme: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return const IconThemeData(color: Color(0xFF00E676)); // Icona verde se attiva
+              return const IconThemeData(color: Color(0xFF00E676)); 
             }
-            return const IconThemeData(color: Colors.grey); // Grigia se inattiva
+            return const IconThemeData(color: Colors.grey); 
           }),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
@@ -80,23 +84,27 @@ class FitTrackApp extends StatelessWidget {
           }),
         ),
 
-        // 6. Pulsante Fluttuante (FAB) in basso a destra
+        // Pulsante Fluttuante rotondo per il salvataggio
         floatingActionButtonTheme: const FloatingActionButtonThemeData(
           backgroundColor: Color(0xFF00E676),
-          foregroundColor: Colors.black, // Icona "+" nera
-          shape: CircleBorder(), // Rotondo perfetto
+          foregroundColor: Colors.black, 
+          shape: CircleBorder(), 
         ),
 
+        // Barra superiore coerente con lo sfondo scuro
         // 7. Barra superiore
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF09090B),
-          surfaceTintColor: Colors.transparent, // Evita che l'appbar cambi colore scorrendo
+        appBarTheme: AppBarTheme( // Attenzione: ho tolto il "const" qui!
+          backgroundColor: const Color(0xFF09090B),
+          surfaceTintColor: Colors.transparent, 
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: TextStyle(
-            fontSize: 20, 
+          // --- LA MODIFICA È QUI ---
+          // Applichiamo GoogleFonts direttamente al titolo. 
+          // Sostituisci "oswald" con il font che hai scelto (es. teko, bebasNeue)
+          titleTextStyle: GoogleFonts.oswald(
+            fontSize: 32, // Ho aumentato un po' la grandezza per renderlo più d'impatto
             fontWeight: FontWeight.bold, 
-            color: Colors.white
+            color: Colors.white,
           ),
         ),
       ),
@@ -113,32 +121,26 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // Questa variabile tiene traccia di quale tab è attualmente selezionato (0 = prima pagina)
   int currentPageIndex = 0;
 
-  // Questa è la lista delle pagine che il menu andrà a scambiare
+  // Lista delle pagine associate alle rispettive sezioni del menu
   final List<Widget> pages = [
-    const AddExercisePage(), // 0: La pagina che abbiamo già creato
-    const HistoryPage(), // 1: La pagina dello storico che abbiamo già creato
-    const SettingsPage(), // 2: La pagina delle impostazioni che abbiamo già creato
+    const AddExercisePage(), 
+    const HistoryPage(),     
+    const SettingsPage(),    
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Il body cambia in base all'indice selezionato
       body: pages[currentPageIndex],
-      
-      // Ecco il nostro menu in basso
       bottomNavigationBar: NavigationBar(
         selectedIndex: currentPageIndex,
-        // Quando tocchi un'icona, aggiorniamo lo stato con il nuovo indice
         onDestinationSelected: (int index) {
           setState(() {
             currentPageIndex = index;
           });
         },
-        // Definiamo i bottoni del menu
         destinations: const [
           NavigationDestination(
             selectedIcon: Icon(Icons.fitness_center),
