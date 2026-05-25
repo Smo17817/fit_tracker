@@ -159,7 +159,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
   // Ritorna un Widget che rappresenta il form del singolo esercizio.
   Widget _buildExerciseCard(Exercise exercise, int exerciseIndex) {
     return Card(
-      // 1. LA CHIAVE: Forza Flutter a ridisegnare la scheda quando carichiamo lo storico
       key: ObjectKey(exercise), 
       margin: const EdgeInsets.only(bottom: 16.0),
       child: Padding(
@@ -169,21 +168,42 @@ class _AddExercisePageState extends State<AddExercisePage> {
           children: [
             Row(
               children: [
+                // CAMPO NOME ESERCIZIO
                 Expanded(
-                  // 2. Usiamo TextFormField e passiamo initialValue
+                  flex: 3, // Prende il 60% dello spazio
                   child: TextFormField(
                     initialValue: exercise.name, 
                     decoration: InputDecoration(
-                      labelText: 'Nome Esercizio ${exerciseIndex + 1}',
+                      labelText: 'Esercizio ${exerciseIndex + 1}',
                       border: const OutlineInputBorder(),
                     ),
                     onChanged: (value) => exercise.name = value,
                   ),
                 ),
                 const SizedBox(width: 8),
+                
+                // --- NUOVO: MENU A TENDINA PER L'UNITA' DI MISURA ---
+                Expanded(
+                  flex: 2, // Prende il 40% dello spazio
+                  child: DropdownButtonFormField<String>(
+                    value: exercise.unit,
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      border: OutlineInputBorder(),
+                    ),
+                    items: ['Kg', 'Sec', 'Min', 'Pace'].map((String u) {
+                      return DropdownMenuItem(value: u, child: Text(u));
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        if (newValue != null) exercise.unit = newValue;
+                      });
+                    },
+                  ),
+                ),
+                
                 IconButton(
                   icon: const Icon(Icons.delete, color: Colors.redAccent),
-                  tooltip: 'Elimina esercizio',
                   onPressed: () {
                     setState(() {
                       exercises.removeAt(exerciseIndex);
@@ -213,7 +233,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      // 3. Precompiliamo le Ripetizioni (evitando di scrivere "0" se è una nuova serie vuota)
                       child: TextFormField(
                         initialValue: currentSet.reps > 0 ? currentSet.reps.toString() : '',
                         decoration: const InputDecoration(labelText: 'Reps'),
@@ -223,10 +242,10 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      // 4. Precompiliamo il Carico 
                       child: TextFormField(
                         initialValue: currentSet.weight > 0 ? currentSet.weight.toString() : '',
-                        decoration: const InputDecoration(labelText: 'Kg'),
+                        // --- LA MAGIA: L'ETICHETTA CAMBIA DINAMICAMENTE ---
+                        decoration: InputDecoration(labelText: exercise.unit), 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (value) => currentSet.weight = double.tryParse(value) ?? 0.0,
                       ),
@@ -245,7 +264,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
             }),
 
             const SizedBox(height: 10),
-            
             Center(
               child: TextButton.icon(
                 onPressed: () {
