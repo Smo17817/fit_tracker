@@ -1,114 +1,146 @@
 import 'package:flutter/material.dart';
 import 'add_exercise.dart';
-import 'hystory_page.dart'; // Mantenuto il nome del file originale
+import 'hystory_page.dart';
+import 'progress_page.dart'; // <-- Re-inserito l'import della pagina progressi
 import 'settings_page.dart';
 import 'models/exercise.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
-  // Obbligatorio quando si esegue codice asincrono prima di runApp()
   WidgetsFlutterBinding.ensureInitialized(); 
-  
-  // Carica i dati dal disco alla memoria RAM
   await loadWorkoutHistory(); 
-  
   runApp(const FitTrackApp());
 }
 
 class FitTrackApp extends StatelessWidget {
   const FitTrackApp({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Fit Tracker',
-      theme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        
-        // Configurazione globale del font per tutto il testo dell'applicazione
-        textTheme: GoogleFonts.oswaldTextTheme(ThemeData.dark().textTheme),
+  ThemeData _getThemeData(String themeName) {
+    final baseTextTheme = themeName == 'Sunset Energy' 
+        ? ThemeData.light().textTheme 
+        : ThemeData.dark().textTheme;
 
-        // Sfondo generale quasi nero
-        scaffoldBackgroundColor: const Color(0xFF09090B), 
-        
-        // Schema colori principale (Dark Mode con accento Verde Neon)
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00E676), 
-          onPrimary: Colors.black,    
-          surface: Color(0xFF18181B), 
-          onSurface: Colors.white,    
+    final textTheme = GoogleFonts.oswaldTextTheme(baseTextTheme);
+
+    Brightness brightness = Brightness.dark;
+    Color scaffoldBg = const Color(0xFF09090B);
+    Color primaryColor = const Color(0xFF00E676);
+    Color onPrimaryColor = Colors.black;
+    Color surfaceColor = const Color(0xFF18181B);
+    Color inputColor = const Color(0xFF27272A);
+
+    switch (themeName) {
+      case 'Sunset Energy': 
+        brightness = Brightness.light;
+        scaffoldBg = const Color(0xFFF4F4F5);
+        primaryColor = const Color(0xFFFF6D00); 
+        onPrimaryColor = Colors.white;
+        surfaceColor = Colors.white;
+        inputColor = const Color(0xFFE4E4E7);
+        break;
+      case 'Ultraviolet Pro': 
+        brightness = Brightness.dark;
+        scaffoldBg = const Color(0xFF07020D); 
+        primaryColor = const Color(0xFFB000FF); 
+        onPrimaryColor = Colors.white;
+        surfaceColor = const Color(0xFF150D22);
+        inputColor = const Color(0xFF241935);
+        break;
+      case 'Iron Crimson': 
+        brightness = Brightness.dark;
+        scaffoldBg = const Color(0xFF121212);
+        primaryColor = const Color(0xFFFF1744); 
+        onPrimaryColor = Colors.white;
+        surfaceColor = const Color(0xFF1E1E1E);
+        inputColor = const Color(0xFF2D2D2D);
+        break;
+      case 'Neon Cyber':
+      default: 
+        brightness = Brightness.dark;
+        scaffoldBg = const Color(0xFF09090B);
+        primaryColor = const Color(0xFF00E676);
+        onPrimaryColor = Colors.black;
+        surfaceColor = const Color(0xFF18181B);
+        inputColor = const Color(0xFF27272A);
+        break;
+    }
+
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      scaffoldBackgroundColor: scaffoldBg,
+      textTheme: textTheme,
+      colorScheme: ColorScheme(
+        brightness: brightness,
+        primary: primaryColor,
+        onPrimary: onPrimaryColor,
+        secondary: primaryColor,
+        onSecondary: onPrimaryColor,
+        error: Colors.red,
+        onError: Colors.white,
+        surface: surfaceColor,
+        onSurface: brightness == Brightness.light ? Colors.black : Colors.white,
+      ),
+      cardTheme: CardTheme(
+        color: surfaceColor,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: inputColor,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: primaryColor, width: 2),
         ),
-
-        // Stile delle Schede (Cards) smussato e piatto
-        cardTheme: CardTheme(
-          color: const Color(0xFF18181B),
-          elevation: 0, 
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-        ),
-
-        // Stile moderno dei campi di testo (Input)
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFF27272A), 
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: Color(0xFF00E676), width: 2),
-          ),
-          labelStyle: const TextStyle(color: Colors.grey),
-          floatingLabelStyle: const TextStyle(color: Color(0xFF00E676)),
-        ),
-
-        // Menu di navigazione inferiore in stile minimalista
-        navigationBarTheme: NavigationBarThemeData(
-          backgroundColor: const Color(0xFF09090B),
-          indicatorColor: const Color(0xFF00E676).withOpacity(0.2), 
-          iconTheme: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const IconThemeData(color: Color(0xFF00E676)); 
-            }
-            return const IconThemeData(color: Colors.grey); 
-          }),
-          labelTextStyle: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.selected)) {
-              return const TextStyle(color: Color(0xFF00E676), fontWeight: FontWeight.bold);
-            }
-            return const TextStyle(color: Colors.grey);
-          }),
-        ),
-
-        // Pulsante Fluttuante rotondo per il salvataggio
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: Color(0xFF00E676),
-          foregroundColor: Colors.black, 
-          shape: CircleBorder(), 
-        ),
-
-        // Barra superiore coerente con lo sfondo scuro
-        // 7. Barra superiore
-        appBarTheme: AppBarTheme( // Attenzione: ho tolto il "const" qui!
-          backgroundColor: const Color(0xFF09090B),
-          surfaceTintColor: Colors.transparent, 
-          elevation: 0,
-          centerTitle: true,
-          // --- LA MODIFICA È QUI ---
-          // Applichiamo GoogleFonts direttamente al titolo. 
-          // Sostituisci "oswald" con il font che hai scelto (es. teko, bebasNeue)
-          titleTextStyle: GoogleFonts.oswald(
-            fontSize: 32, // Ho aumentato un po' la grandezza per renderlo più d'impatto
-            fontWeight: FontWeight.bold, 
-            color: Colors.white,
-          ),
+        labelStyle: const TextStyle(color: Colors.grey),
+        floatingLabelStyle: BorderSide.none == BorderSide.none ? TextStyle(color: primaryColor) : null,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: scaffoldBg,
+        indicatorColor: primaryColor.withOpacity(0.15),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          return IconThemeData(color: states.contains(WidgetState.selected) ? primaryColor : Colors.grey);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          return TextStyle(
+            color: states.contains(WidgetState.selected) ? primaryColor : Colors.grey,
+            fontWeight: states.contains(WidgetState.selected) ? FontWeight.bold : FontWeight.normal,
+          );
+        }),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primaryColor,
+        foregroundColor: onPrimaryColor,
+        shape: const CircleBorder(),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: scaffoldBg,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        titleTextStyle: GoogleFonts.oswald(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: brightness == Brightness.light ? Colors.black : Colors.white,
         ),
       ),
-      home: const MainScreen(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<String>(
+      valueListenable: currentThemeNotifier,
+      builder: (context, currentTheme, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Fit Tracker',
+          theme: _getThemeData(currentTheme),
+          home: const MainScreen(),
+        );
+      },
     );
   }
 }
@@ -123,11 +155,12 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int currentPageIndex = 0;
 
-  // Lista delle pagine associate alle rispettive sezioni del menu
+  // --- RE-INSERITA LA PAGINA DEI PROGRESSI QUI ---
   final List<Widget> pages = [
     const AddExercisePage(), 
     const HistoryPage(),     
-    const SettingsPage(),    
+    const ProgressPage(), // Indice 2
+    const SettingsPage(), // Indice 3
   ];
 
   @override
@@ -141,21 +174,27 @@ class _MainScreenState extends State<MainScreen> {
             currentPageIndex = index;
           });
         },
+        // --- RE-INSERITA L'ICONA DEI PROGRESSI QUI ---
         destinations: const [
           NavigationDestination(
-            selectedIcon: Icon(Icons.fitness_center),
-            icon: Icon(Icons.fitness_center_outlined),
-            label: 'Allenamento',
+            selectedIcon: Icon(Icons.fitness_center), 
+            icon: Icon(Icons.fitness_center_outlined), 
+            label: 'Allenamento'
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.history),
-            icon: Icon(Icons.history_outlined),
-            label: 'Storico',
+            selectedIcon: Icon(Icons.history), 
+            icon: Icon(Icons.history_outlined), 
+            label: 'Storico'
           ),
           NavigationDestination(
-            selectedIcon: Icon(Icons.settings),
-            icon: Icon(Icons.settings_outlined),
-            label: 'Impostazioni',
+            selectedIcon: Icon(Icons.trending_up), 
+            icon: Icon(Icons.trending_up_outlined), 
+            label: 'Progressi'
+          ),
+          NavigationDestination(
+            selectedIcon: Icon(Icons.settings), 
+            icon: Icon(Icons.settings_outlined), 
+            label: 'Impostazioni'
           ),
         ],
       ),

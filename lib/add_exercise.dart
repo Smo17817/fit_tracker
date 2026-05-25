@@ -32,7 +32,6 @@ class _AddExercisePageState extends State<AddExercisePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Workout del Giorno'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -98,8 +97,9 @@ class _AddExercisePageState extends State<AddExercisePage> {
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              side: const BorderSide(color: Color(0xFF00E676), width: 2), // Bordo verde neon
-              foregroundColor: const Color(0xFF00E676), // Testo verde neon
+              // Usiamo il colore primario del tema attivo invece di un colore fisso
+              side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2), 
+              foregroundColor: Theme.of(context).colorScheme.primary, 
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),

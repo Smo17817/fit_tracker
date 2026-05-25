@@ -15,7 +15,6 @@ class _HistoryPageState extends State<HistoryPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Storico Allenamenti'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: globalWorkoutHistory.isEmpty
           ? const Center(

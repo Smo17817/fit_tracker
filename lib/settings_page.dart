@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:typed_data'; // Necessario per Uint8List
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:share_plus/share_plus.dart';
-import '../models/exercise.dart'; // Assicurati che questo percorso sia corretto
+import '../models/exercise.dart'; 
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -13,27 +13,24 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  // --- LOGICA DI ESPORTAZIONE (WEB SAFE) ---
+  // Lista dei temi disponibili per la selezione
+  final List<String> appThemes = [
+    'Neon Cyber',
+    'Sunset Energy',
+    'Ultraviolet Pro',
+    'Iron Crimson'
+  ];
+
   Future<void> _exportData() async {
     try {
-      // 1. Convertiamo in JSON
       final String jsonString = jsonEncode(globalWorkoutHistory.map((e) => e.toJson()).toList());
-      
-      // 2. Trasformiamo la stringa in un array di byte (memoria)
       final List<int> bytes = utf8.encode(jsonString);
-      
-      // 3. Creiamo un XFile virtuale dai byte
       final xfile = XFile.fromData(
         Uint8List.fromList(bytes), 
         name: 'gym_tracker_backup.json', 
         mimeType: 'application/json'
       );
-      
-      // 4. share_plus capirà automaticamente che su Web deve avviare il download del file
-      await Share.shareXFiles(
-        [xfile], 
-        text: 'Backup Storico Allenamenti',
-      );
+      await Share.shareXFiles([xfile], text: 'Backup Storico Allenamenti');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -43,22 +40,16 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  // --- LOGICA DI IMPORTAZIONE (WEB SAFE) ---
   Future<void> _importData() async {
     try {
-      // 1. Aggiungiamo withData: true. È FONDAMENTALE sul web per farci restituire i byte del file
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['json'],
         withData: true, 
       );
 
-      // Controlliamo che result.files.single.bytes non sia nullo
       if (result != null && result.files.single.bytes != null) {
-        // 2. Decodifichiamo i byte in una stringa di testo
         String jsonString = utf8.decode(result.files.single.bytes!);
-        
-        // 3. Facciamo il parsing del JSON
         final List<dynamic> jsonList = jsonDecode(jsonString);
         final List<WorkoutSession> importedHistory = jsonList.map((e) => WorkoutSession.fromJson(e)).toList();
 
@@ -69,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('File non valido o corrotto. Impossibile importare. Dettagli: $e')),
+          SnackBar(content: Text('File non valido o corrotto: $e')),
         );
       }
     }
@@ -81,20 +72,12 @@ class _SettingsPageState extends State<SettingsPage> {
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Importa Backup'),
-          content: const Text(
-            'Vuoi sostituire il tuo storico attuale con i dati del backup o aggiungerli a quelli esistenti?',
-          ),
+          content: const Text('Vuoi sostituire il tuo storico attuale con i dati del backup o aggiungerli a quelli esistenti?'),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Annulla'),
-            ),
+            TextButton(onPressed: () => Navigator.of(dialogContext).pop(), child: const Text('Annulla')),
             TextButton(
               onPressed: () async {
-                setState(() {
-                  // Aggiungiamo i dati importati alla lista attuale
-                  globalWorkoutHistory.addAll(importedData); 
-                });
+                setState(() { globalWorkoutHistory.addAll(importedData); });
                 await saveWorkoutHistory();
                 if (mounted) Navigator.of(dialogContext).pop();
                 _mostraSuccesso('Dati aggiunti con successo!');
@@ -103,10 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             TextButton(
               onPressed: () async {
-                setState(() {
-                  // Sostituiamo interamente la lista
-                  globalWorkoutHistory = importedData;
-                });
+                setState(() { globalWorkoutHistory = importedData; });
                 await saveWorkoutHistory();
                 if (mounted) Navigator.of(dialogContext).pop();
                 _mostraSuccesso('Storico sovrascritto con successo!');
@@ -125,20 +105,70 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // --- INTERFACCIA UTENTE ---
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Impostazioni'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // --- NUOVA SEZIONE: STILE APP ---
+          const Text(
+            'Personalizzazione',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
+          ),
+          const SizedBox(height: 16),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Stile Interfaccia',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  // Ascoltiamo il notifier per mostrare il valore corretto nel Dropdown
+                  ValueListenableBuilder<String>(
+                    valueListenable: currentThemeNotifier,
+                    builder: (context, currentTheme, child) {
+                      return DropdownButtonFormField<String>(
+                        value: currentTheme,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        ),
+                        items: appThemes.map((String theme) {
+                          return DropdownMenuItem<String>(
+                            value: theme,
+                            child: Text(theme),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) async {
+                          if (newValue != null) {
+                            // Aggiorna il tema globalmente
+                            currentThemeNotifier.value = newValue;
+                            // Salva la scelta in memoria locale
+                            await saveWorkoutHistory(); 
+                          }
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+
+          // --- SEZIONE GESTIONE DATI (ESISTENTE) ---
           const Text(
             'Gestione Dati',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.grey),
           ),
           const SizedBox(height: 16),
           Card(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 
 class WorkoutSet {
   int reps;
@@ -73,20 +74,33 @@ List<WorkoutSession> globalWorkoutHistory = [];
 
 // === NUOVE FUNZIONI DI SALVATAGGIO E CARICAMENTO GLOBALI ===
 
+// --- AGGIUNGI IN FONDO A lib/models/exercise.dart ---
+
+// Notificatore globale per il tema attuale (Default: Neon Cyber)
+ValueNotifier<String> currentThemeNotifier = ValueNotifier('Neon Cyber');
+
 Future<void> saveWorkoutHistory() async {
   final prefs = await SharedPreferences.getInstance();
-  // Trasforma la lista di oggetti in una stringa JSON
   final String jsonString = jsonEncode(globalWorkoutHistory.map((e) => e.toJson()).toList());
   await prefs.setString('history_data', jsonString);
+  
+  // Salva anche il tema attuale
+  await prefs.setString('selected_theme', currentThemeNotifier.value);
 }
 
 Future<void> loadWorkoutHistory() async {
   final prefs = await SharedPreferences.getInstance();
-  final String? jsonString = prefs.getString('history_data');
   
+  // Carica lo storico
+  final String? jsonString = prefs.getString('history_data');
   if (jsonString != null) {
-    // Trasforma la stringa JSON di nuovo nella lista di oggetti
     final List<dynamic> jsonList = jsonDecode(jsonString);
     globalWorkoutHistory = jsonList.map((e) => WorkoutSession.fromJson(e)).toList();
+  }
+
+  // Carica il tema salvato (se esiste)
+  final String? savedTheme = prefs.getString('selected_theme');
+  if (savedTheme != null) {
+    currentThemeNotifier.value = savedTheme;
   }
 }
