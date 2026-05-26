@@ -130,9 +130,17 @@ class _AddExercisePageState extends State<AddExercisePage> {
           await saveWorkoutHistory();
 
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Allenamento salvato con successo!', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              backgroundColor: Color(0xFF00E676),
+            SnackBar( // ATTENZIONE: ho rimosso il "const" qui prima di SnackBar
+              content: Text(
+                'Allenamento salvato con successo!', 
+                style: TextStyle(
+                  // Il testo prende il colore ideale per essere letto sullo sfondo primario
+                  color: Theme.of(context).colorScheme.onPrimary, 
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              // Lo sfondo prende il colore primario del tema attualmente selezionato
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
 
