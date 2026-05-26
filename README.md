@@ -1,56 +1,65 @@
-# Fit Tracker 🏋️‍♂️
 
-Un'applicazione mobile minimalista, potente e completamente offline per tracciare i tuoi allenamenti in palestra. Progettata con un'interfaccia moderna e fluida, Fit Tracker ti permette di concentrarti sull'allenamento, mantenendo il pieno controllo sui tuoi dati e sui tuoi progressi.
+# 🏋️‍♂️ Fit Tracker
 
-![Fit Tracker Banner](https://via.placeholder.com/1200x300/09090B/00E676?text=Fit+Tracker+-+Unleash+Your+Limits) 
-*(Consiglio: sostituisci questo link con un bel banner o un collage dei tuoi screenshot!)*
+![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 
-## ✨ Caratteristiche Principali
+Fit Tracker è un'applicazione mobile sviluppata in **Flutter** pensata per offrire un tracciamento degli allenamenti intelligente, rapido e orientato ai dati. Nata dall'esigenza di monitorare costantemente gli allenamenti fisici — dal sollevamento pesi puro fino alle sessioni di cardio ad alta pendenza sul tapis roulant — l'app unisce un'interfaccia pulita a logiche di filtraggio e analisi avanzate.
 
-* 📝 **Tracking Intuitivo:** Registra esercizi, serie, ripetizioni e seleziona l'unità di misura adatta (Kg, Minuti, Secondi, Pace).
-* 📈 **Analisi dei Progressi:** Una dashboard dedicata genera automaticamente grafici a barre per visualizzare l'andamento dei carichi e calcola il tuo **PR (Personal Record)** per ogni esercizio.
-* 🎨 **Temi Dinamici:** Personalizza l'atmosfera del tuo allenamento con 4 stili unici integrati:
-    * 🟩 **Neon Cyber** (Scuro - Default)
-    * 🟧 **Sunset Energy** (Chiaro)
-    * 🟪 **Ultraviolet Pro** (Scuro)
-    * 🟥 **Iron Crimson** (Scuro)
-* 💾 **Controllo Totale sui Dati (100% Offline):** Nessun server, nessun account richiesto. Esporta l'intero storico in formato JSON per fare un backup o importalo su un nuovo dispositivo in un click.
+---
 
-## 📸 Screenshots
+## ✨ Funzionalità Principali
 
-| Allenamento | Storico | Progressi e PR | Temi (Impostazioni) |
-| :---: | :---: | :---: | :---: |
-| ![Workout](https://via.placeholder.com/200x400?text=Screenshot+1) | ![History](https://via.placeholder.com/200x400?text=Screenshot+2) | ![Progress](https://via.placeholder.com/200x400?text=Screenshot+3) | ![Settings](https://via.placeholder.com/200x400?text=Screenshot+4) |
+*   🧠 **Smart Logging & Autocompletamento:** Inserimento degli esercizi fulmineo. L'app impara dal tuo storico e ti suggerisce i nomi degli esercizi in base al gruppo muscolare selezionato.
+*   🔄 **Auto-Load delle Schede:** Selezionando un gruppo muscolare, l'app carica automaticamente l'ultima scheda eseguita per quello specifico distretto, permettendoti di ripartire esattamente da dove avevi lasciato.
+*   📈 **Analisi Avanzata dei Progressi (Dual View):** Grafici interattivi e scorrevoli per monitorare le tue prestazioni con un semplice swipe:
+    *   **Massimale (PR):** Traccia il picco di forza e l'evoluzione del carico massimo.
+    *   **Volume Totale:** Calcola e visualizza il tonnellaggio totale (Serie × Ripetizioni × Peso), fondamentale per il monitoraggio dell'ipertrofia.
+*   🔍 **Storico Filtrabile:** Un database locale completo dei tuoi allenamenti. Cerca per nome dell'esercizio, filtra per distretto muscolare o visualizza rapidamente solo l'ultima sessione eseguita per ogni gruppo.
+*   ⚖️ **Unità di Misura Dinamiche:** Supporto completo per tracciare pesi (`Kg`), tempi di recupero o tenute isometriche (`Sec`, `Min`) e ritmi di corsa (`Pace`).
+*   🎨 **Theming Dinamico:** Interfaccia utente fluida che si adatta automaticamente al tema di sistema (Chiaro/Scuro) e ai colori primari scelti dall'utente, garantendo un'esperienza visiva sempre coerente.
+*   💾 **Offline First & Privacy:** Tutti i dati vengono salvati localmente sul dispositivo (`shared_preferences`), garantendo massima reattività e privacy totale, senza necessità di connessione internet.
 
-*(Aggiungi i tuoi screenshot nella cartella del repository e sostituisci i link qui sopra)*
+---
 
-## 🛠️ Stack Tecnologico
+## 📸 Anteprima (Screenshots)
+<p align="center">
+   <img width="32%" alt="Image" src="https://github.com/user-attachments/assets/2bd5d71f-8e1f-41d0-996e-bbbef2953dad" />
+   <img width="32%" alt="Image" src="https://github.com/user-attachments/assets/44f51086-07d0-4d8b-ba7f-3bfd31d16046" />
+   <img width="32%" alt="Image" src="https://github.com/user-attachments/assets/b1d56868-0cb6-4b6b-8b26-33ef9b3caea0" />
+</p>
 
-Questo progetto è sviluppato interamente in **Flutter** e **Dart**.
-I pacchetti principali utilizzati includono:
-* `shared_preferences`: Per il salvataggio locale dei dati e del tema.
-* `file_picker` & `share_plus`: Per la gestione, l'importazione e l'esportazione dei backup JSON nativi.
-* `google_fonts`: Per la tipografia dinamica e aggressiva (Oswald).
+---
 
-## 🚀 Come Installare e Avviare
+## 🚀 Installazione e Avvio
 
-### Prerequisiti
-Assicurati di aver installato:
-* [Flutter SDK](https://flutter.dev/docs/get-started/install) (versione >=3.4.0)
-* Android Studio o VS Code
-* Java JDK 17 (o compatibile con il tuo Gradle wrapper)
+Assicurati di avere [Flutter](https://flutter.dev/docs/get-started/install) installato sul tuo computer.
 
-### Clonare il progetto
-
+1. **Clona il repository:**
 ```bash
-git clone [https://github.com/TuoNomeUtente/fit_tracker.git](https://github.com/TuoNomeUtente/fit_tracker.git)
+git clone https://github.com/Smo17817/fit_tracker.git
+```
+
+2. **Entra nella directory del progetto:**
+```bash
 cd fit_tracker
 ```
 
-### 🤝 Contribuire
-I contributi sono sempre i benvenuti! Se hai un'idea per migliorare l'app:
-1. Fai un Fork del progetto
-2. Crea un tuo Branch (git checkout -b feature/NuovaFunzione)
-3. Fai il Commit delle tue modifiche (git commit -m 'Aggiunta NuovaFunzione')
-4. Fai il Push sul Branch (git push origin feature/NuovaFunzione)
-5. Apri una Pull Request
+3. **Scarica le dipendenze:**
+```bash
+flutter pub get
+```
+
+4. **Esegui l'app:**
+```bash
+flutter run
+```
+
+### Generare l'APK per Android
+Per creare un pacchetto di installazione standalone compresso e ottimizzato:
+
+```bash
+flutter build apk --release
+```
+Troverai il file generato al percorso: ```build/app/outputs/flutter-apk/app-release.apk```.
