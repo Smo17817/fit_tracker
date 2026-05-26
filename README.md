@@ -1,6 +1,6 @@
 
 # 🏋️‍♂️ Fit Tracker
-
+[![Release](https://img.shields.io/github/v/release/Smo17817/fit_tracker?style=for-the-badge&color=success)](https://github.com/Smo17817/fit_tracker/releases/latest)
 ![Flutter](https://img.shields.io/badge/Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/dart-%230175C2.svg?style=for-the-badge&logo=dart&logoColor=white)
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
@@ -32,7 +32,17 @@ Fit Tracker è un'applicazione mobile sviluppata in **Flutter** pensata per offr
 
 ---
 
-## 🚀 Installazione e Avvio
+## 📥 Download (Ultima Versione)
+
+La versione **v1.0.0** è ora disponibile! Puoi scaricare e installare direttamente l'app sul tuo smartphone Android:
+
+1. Vai alla pagina delle **[Releases](https://github.com/Smo17817/fit_tracker/releases/latest)**.
+2. Scarica il file `Fit_Tracker_v1.0.0.apk` (o il nome che hai dato al file) dalla sezione **Assets**.
+3. Apri il file sul tuo telefono per installarlo. *(Nota: potrebbe esserti richiesto di autorizzare l'installazione da fonti sconosciute).*
+
+---
+
+## 🚀 Installazione e Avvio in Locale
 
 Assicurati di avere [Flutter](https://flutter.dev/docs/get-started/install) installato sul tuo computer.
 
@@ -56,9 +66,8 @@ flutter pub get
 flutter run
 ```
 
-### Generare l'APK per Android
-Per creare un pacchetto di installazione standalone compresso e ottimizzato:
-
+### Per gli Sviluppatori: Generare l'APK dai sorgenti
+Se preferisci compilare l'app in autonomia dal codice sorgente:
 ```bash
 flutter build apk --release
 ```
