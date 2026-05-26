@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/exercise.dart';
+import 'data/muscle_groups.dart'; // <-- Importiamo la lista centralizzata dei gruppi muscolari
 
 class AddExercisePage extends StatefulWidget {
   const AddExercisePage({super.key});
@@ -13,17 +14,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
   String? selectedMuscleGroup;
   
   // 2. Definiamo la lista dei gruppi muscolari disponibili
-  final List<String> muscleGroups = [
-    'Petto',
-    'Dorso',
-    'Gambe',
-    'Spalle',
-    'Bicipiti',
-    'Tricipiti',
-    'Addome',
-    'Full Body',
-    'Cardio'
-  ];
+  final List<String> muscleGroups = appMuscleGroups;
 
   List<Exercise> exercises = [Exercise()];
 
