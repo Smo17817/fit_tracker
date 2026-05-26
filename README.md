@@ -37,7 +37,7 @@ Fit Tracker è un'applicazione mobile sviluppata in **Flutter** pensata per offr
 La versione **v1.0.0** è ora disponibile! Puoi scaricare e installare direttamente l'app sul tuo smartphone Android:
 
 1. Vai alla pagina delle **[Releases](https://github.com/Smo17817/fit_tracker/releases/latest)**.
-2. Scarica il file `Fit_Tracker_v1.0.0.apk` (o il nome che hai dato al file) dalla sezione **Assets**.
+2. Scarica il file `Fit_Tracker_v1.0.0.apk` dalla sezione **Assets**.
 3. Apri il file sul tuo telefono per installarlo. *(Nota: potrebbe esserti richiesto di autorizzare l'installazione da fonti sconosciute).*
 
 ---
