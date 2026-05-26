@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'models/exercise.dart';
-import 'data/muscle_groups.dart'; // <-- Importiamo la lista centralizzata dei gruppi muscolari
+import '../models/exercise.dart';
+import '../data/muscle_groups.dart';
 
 class AddExercisePage extends StatefulWidget {
   const AddExercisePage({super.key});
@@ -10,13 +10,30 @@ class AddExercisePage extends StatefulWidget {
 }
 
 class _AddExercisePageState extends State<AddExercisePage> {
-  // 1. Variabile per il gruppo selezionato (ora può essere nulla all'inizio)
+  // 1. Variabile per il gruppo selezionato
   String? selectedMuscleGroup;
   
   // 2. Definiamo la lista dei gruppi muscolari disponibili
   final List<String> muscleGroups = appMuscleGroups;
 
   List<Exercise> exercises = [Exercise()];
+
+  // Metodo per estrarre i nomi degli esercizi passati in base al gruppo
+  List<String> _getEserciziSuggeriti(String? gruppoAttuale) {
+    if (gruppoAttuale == null) return [];
+    
+    Set<String> nomi = {};
+    for (var session in globalWorkoutHistory) {
+      if (session.muscleGroup == gruppoAttuale) {
+        for (var ex in session.exercises) {
+          if (ex.name.trim().isNotEmpty) {
+            nomi.add(ex.name.trim());
+          }
+        }
+      }
+    }
+    return nomi.toList()..sort();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +49,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
             decoration: const InputDecoration(
               labelText: 'Gruppo Muscolare',
               border: OutlineInputBorder(),
+              prefixIcon: Icon(Icons.accessibility_new),
             ),
             value: selectedMuscleGroup,
             hint: const Text('Seleziona un gruppo...'),
@@ -45,6 +63,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
               setState(() {
                 selectedMuscleGroup = newValue;
 
+                // LOGICA DI AUTOCARICAMENTO DELL'ULTIMO ALLENAMENTO
                 if (newValue != null) {
                   final pastWorkouts = globalWorkoutHistory.where(
                     (workout) => workout.muscleGroup == newValue
@@ -56,7 +75,11 @@ class _AddExercisePageState extends State<AddExercisePage> {
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Caricato ultimo allenamento: $newValue!'),
+                        content: Text(
+                          'Caricato ultimo allenamento: $newValue!',
+                          style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                        ),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         duration: const Duration(seconds: 2),
                       ),
                     );
@@ -84,11 +107,10 @@ class _AddExercisePageState extends State<AddExercisePage> {
 
           const SizedBox(height: 20),
 
-          // --- NUOVO PULSANTE: AGGIUNGI ESERCIZIO ---
+          // --- IL TUO PULSANTE: AGGIUNGI ESERCIZIO ---
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              // Usiamo il colore primario del tema attivo invece di un colore fisso
               side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 2), 
               foregroundColor: Theme.of(context).colorScheme.primary, 
               shape: RoundedRectangleBorder(
@@ -108,14 +130,21 @@ class _AddExercisePageState extends State<AddExercisePage> {
         ],
       ),
       
-      // --- NUOVO PULSANTE: SALVA ALLENAMENTO (FAB) ---
-      // Usiamo .extended per avere sia l'icona che il testo
-      // --- PULSANTE: SALVA ALLENAMENTO (Solo Icona) ---
+      // --- IL TUO PULSANTE: SALVA ALLENAMENTO (FAB) ---
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // Rimuove eventuali esercizi vuoti prima del salvataggio
+          exercises.removeWhere((ex) => ex.name.trim().isEmpty);
+
           if (exercises.isEmpty || selectedMuscleGroup == null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Seleziona un gruppo muscolare e inserisci almeno un esercizio!')),
+              SnackBar(
+                content: Text(
+                  'Seleziona un gruppo muscolare e inserisci almeno un esercizio!',
+                  style: TextStyle(color: Theme.of(context).colorScheme.onError),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
             );
             return;
           }
@@ -127,68 +156,123 @@ class _AddExercisePageState extends State<AddExercisePage> {
           );
 
           globalWorkoutHistory.add(session);
-          await saveWorkoutHistory();
+          
+          // Se hai una funzione di salvataggio (es. SharedPreferences), decommenta questa riga
+          // await saveWorkoutHistory();
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar( // ATTENZIONE: ho rimosso il "const" qui prima di SnackBar
-              content: Text(
-                'Allenamento salvato con successo!', 
-                style: TextStyle(
-                  // Il testo prende il colore ideale per essere letto sullo sfondo primario
-                  color: Theme.of(context).colorScheme.onPrimary, 
-                  fontWeight: FontWeight.bold,
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  'Allenamento salvato con successo!', 
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary, 
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
+                backgroundColor: Theme.of(context).colorScheme.primary,
               ),
-              // Lo sfondo prende il colore primario del tema attualmente selezionato
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-          );
+            );
+          }
 
           setState(() {
             selectedMuscleGroup = null;
             exercises = [Exercise()];
           });
         },
-        child: const Icon(Icons.save), // <--- Solo l'icona qui
+        child: const Icon(Icons.save), 
       ),
     );
   }
 
-  // Metodo helper per tenere il codice del build pulito.
-  // Ritorna un Widget che rappresenta il form del singolo esercizio.
   Widget _buildExerciseCard(Exercise exercise, int exerciseIndex) {
     return Card(
       key: ObjectKey(exercise), 
       margin: const EdgeInsets.only(bottom: 16.0),
+      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // CAMPO NOME ESERCIZIO
+                // --- CAMPO NOME ESERCIZIO CON AUTOCOMPLETE ---
                 Expanded(
-                  flex: 3, // Prende il 60% dello spazio
-                  child: TextFormField(
-                    initialValue: exercise.name, 
-                    decoration: InputDecoration(
-                      labelText: 'Esercizio ${exerciseIndex + 1}',
-                      border: const OutlineInputBorder(),
-                    ),
-                    onChanged: (value) => exercise.name = value,
+                  flex: 3,
+                  child: Autocomplete<String>(
+                    // Permette di mostrare il nome precaricato (se carichi l'ultimo allenamento)
+                    initialValue: TextEditingValue(text: exercise.name),
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return const Iterable<String>.empty();
+                      }
+                      final suggerimenti = _getEserciziSuggeriti(selectedMuscleGroup);
+                      return suggerimenti.where((String opzione) {
+                        return opzione.toLowerCase().contains(textEditingValue.text.toLowerCase());
+                      });
+                    },
+                    onSelected: (String selezione) {
+                      exercise.name = selezione;
+                    },
+                    fieldViewBuilder: (context, textController, focusNode, onSubmitted) {
+                      return TextFormField(
+                        controller: textController,
+                        focusNode: focusNode,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: InputDecoration(
+                          labelText: 'Esercizio ${exerciseIndex + 1}',
+                          border: const OutlineInputBorder(),
+                          isDense: true,
+                        ),
+                        // Aggiorniamo il modello ad ogni lettera digitata
+                        onChanged: (val) => exercise.name = val,
+                      );
+                    },
+                    optionsViewBuilder: (context, onSelected, options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxHeight: 200, 
+                              maxWidth: MediaQuery.of(context).size.width * 0.55,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final String option = options.elementAt(index);
+                                return InkWell(
+                                  onTap: () => onSelected(option),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Text(option),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 8),
                 
-                // --- NUOVO: MENU A TENDINA PER L'UNITA' DI MISURA ---
+                // --- MENU A TENDINA PER L'UNITA' DI MISURA ---
                 Expanded(
-                  flex: 2, // Prende il 40% dello spazio
+                  flex: 2, 
                   child: DropdownButtonFormField<String>(
                     value: exercise.unit,
                     decoration: const InputDecoration(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                       border: OutlineInputBorder(),
+                      isDense: true,
                     ),
                     items: ['Kg', 'Sec', 'Min', 'Pace'].map((String u) {
                       return DropdownMenuItem(value: u, child: Text(u));
@@ -234,7 +318,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     Expanded(
                       child: TextFormField(
                         initialValue: currentSet.reps > 0 ? currentSet.reps.toString() : '',
-                        decoration: const InputDecoration(labelText: 'Reps'),
+                        decoration: const InputDecoration(labelText: 'Reps', isDense: true),
                         keyboardType: TextInputType.number,
                         onChanged: (value) => currentSet.reps = int.tryParse(value) ?? 0,
                       ),
@@ -243,8 +327,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
                     Expanded(
                       child: TextFormField(
                         initialValue: currentSet.weight > 0 ? currentSet.weight.toString() : '',
-                        // --- LA MAGIA: L'ETICHETTA CAMBIA DINAMICAMENTE ---
-                        decoration: InputDecoration(labelText: exercise.unit), 
+                        decoration: InputDecoration(labelText: exercise.unit, isDense: true), 
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: (value) => currentSet.weight = double.tryParse(value) ?? 0.0,
                       ),
