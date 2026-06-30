@@ -158,7 +158,7 @@ class _AddExercisePageState extends State<AddExercisePage> {
           globalWorkoutHistory.add(session);
           
           // Se hai una funzione di salvataggio (es. SharedPreferences), decommenta questa riga
-          // await saveWorkoutHistory();
+          await saveWorkoutHistory();
 
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
